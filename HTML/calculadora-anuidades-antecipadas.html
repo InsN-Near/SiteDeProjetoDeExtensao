@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Anuidades Antecipadas</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Anuidades Antecipadas</h1>
+        <p>Calcule o valor futuro ou presente de anuidades antecipadas.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Anuidades Antecipadas?</h2>
+            <p>
+                Anuidades antecipadas são séries de pagamentos iguais realizados no <strong>início</strong> de cada período, como aluguéis ou planos de assinatura.
+            </p>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-anuidade">
+                <label for="valor">Valor do pagamento (PMT):</label><br>
+                <input type="number" id="valor" name="valor" required><br>
+                <label for="taxa">Taxa de juros (i):</label><br>
+                <input type="number" id="taxa" name="taxa" step="0.01" required><br>
+                <label for="periodos">Número de períodos (n):</label><br>
+                <input type="number" id="periodos" name="periodos" required><br>
+                <label for="tipo">Tipo de cálculo:</label><br>
+                <select id="tipo" name="tipo">
+                    <option value="futuro">Valor Futuro (FV)</option>
+                    <option value="presente">Valor Presente (PV)</option>
+                </select><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p><span id="resultado-tipo"></span>: <span id="resultado-valor"></span></p>
+                <table id="tabela-resultados" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Pagamento</th>
+                            <th>Juros</th>
+                            <th>Saldo Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Resultados da tabela aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Gráfico da Evolução do Saldo</h2>
+            <canvas id="grafico-anuidade"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-anuidade');
+        const resultados = document.getElementById('resultados');
+        const resultadoTipo = document.getElementById('resultado-tipo');
+        const resultadoValor = document.getElementById('resultado-valor');
+        const tabelaResultados = document.getElementById('tabela-resultados').getElementsByTagName('tbody')[0];
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-anuidade');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const valor = parseFloat(document.getElementById('valor').value);
+            const taxa = parseFloat(document.getElementById('taxa').value) / 100;
+            const periodos = parseInt(document.getElementById('periodos').value);
+            const tipo = document.getElementById('tipo').value;
+
+            let resultado;
+            if (tipo === 'futuro') {
+                resultado = calcularValorFuturo(valor, taxa, periodos);
+                resultadoTipo.textContent = 'Valor Futuro (FV)';
+            } else {
+                resultado = calcularValorPresente(valor, taxa, periodos);
+                resultadoTipo.textContent = 'Valor Presente (PV)';
+            }
+
+            resultadoValor.textContent = resultado.toFixed(2);
+            resultados.style.display = 'block';
+
+            gerarTabela(valor, taxa, periodos, tipo);
+            gerarGrafico(valor, taxa, periodos, tipo);
+        });
+
+        function calcularValorFuturo(valor, taxa, periodos) {
+            return valor * ((Math.pow(1 + taxa, periodos) - 1) / taxa) * (1 + taxa);
+        }
+
+        function calcularValorPresente(valor, taxa, periodos) {
+            return valor * ((1 - Math.pow(1 + taxa, -periodos)) / taxa) * (1 + taxa);
+        }
+
+        function gerarTabela(valor, taxa, periodos, tipo) {
+            tabelaResultados.innerHTML = ''; // Limpa a tabela
+
+            let saldo = 0;
+            for (let i = 1; i <= periodos; i++) {
+                const juros = saldo * taxa;
+                saldo += valor + juros;
+
+                const linha = tabelaResultados.insertRow();
+                linha.insertCell().textContent = i;
+                linha.insertCell().textContent = valor.toFixed(2);
+                linha.insertCell().textContent = juros.toFixed(2);
+                linha.insertCell().textContent = saldo.toFixed(2);
+            }
+
+            tabelaResultados.style.display = 'table';
+        }
+
+        function gerarGrafico(valor, taxa, periodos, tipo) {
+            const labels = [];
+            const dadosSaldo = [];
+
+            let saldo = 0;
+            for (let i = 1; i <= periodos; i++) {
+                labels.push(`Período ${i}`);
+                const juros = saldo * taxa;
+                saldo += valor + juros;
+                dadosSaldo.push(saldo);
+            }
+
+            if (grafico) {
+                grafico.destroy();
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Saldo Acumulado',
+                        data: dadosSaldo,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            graficoSecao.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>

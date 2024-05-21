@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Amortização</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Amortização</h1>
+        <p>Simule e analise as parcelas do seu financiamento.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que é Amortização?</h2>
+            <p>
+                Amortização é o processo de pagamento gradual de uma dívida através de parcelas periódicas. Cada parcela é composta por uma parte de juros e outra de amortização do principal. Existem diferentes sistemas de amortização, como SAC e PRICE, que impactam na forma como o valor das parcelas e os juros são distribuídos ao longo do tempo.
+            </p>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-amortizacao">
+                <label for="valor-emprestimo">Valor do empréstimo:</label><br>
+                <input type="number" id="valor-emprestimo" name="valor-emprestimo" required><br>
+                <label for="taxa-juros">Taxa de juros (% ao ano):</label><br>
+                <input type="number" id="taxa-juros" name="taxa-juros" step="0.01" required><br>
+                <label for="prazo">Prazo (em meses):</label><br>
+                <input type="number" id="prazo" name="prazo" required><br>
+                <label for="sistema">Sistema de amortização:</label><br>
+                <select id="sistema" name="sistema">
+                    <option value="sac">SAC</option>
+                    <option value="price">PRICE</option>
+                </select><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <table id="tabela-amortizacao">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Amortização</th>
+                            <th>Juros</th>
+                            <th>Parcela</th>
+                            <th>Saldo Devedor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Conteúdo da tabela de amortização será inserido aqui -->
+                    </tbody>
+                </table>
+
+                <canvas id="grafico-amortizacao"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-amortizacao');
+        const resultados = document.getElementById('resultados');
+        const tabelaAmortizacao = document.getElementById('tabela-amortizacao').getElementsByTagName('tbody')[0];
+        const graficoCanvas = document.getElementById('grafico-amortizacao');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const valorEmprestimo = parseFloat(document.getElementById('valor-emprestimo').value);
+            const taxaJuros = parseFloat(document.getElementById('taxa-juros').value) / 100 / 12; // Converte a taxa para decimal ao mês
+            const prazo = parseInt(document.getElementById('prazo').value);
+            const sistema = document.getElementById('sistema').value;
+
+            let amortizacao, juros, parcela, saldoDevedor;
+
+            tabelaAmortizacao.innerHTML = ''; // Limpa a tabela anterior
+
+            if (sistema === 'sac') {
+                amortizacao = valorEmprestimo / prazo;
+                saldoDevedor = valorEmprestimo;
+
+                for (let i = 1; i <= prazo; i++) {
+                    juros = saldoDevedor * taxaJuros;
+                    parcela = amortizacao + juros;
+                    saldoDevedor -= amortizacao;
+
+                    adicionarLinhaTabela(i, amortizacao.toFixed(2), juros.toFixed(2), parcela.toFixed(2), saldoDevedor.toFixed(2));
+                }
+            } else if (sistema === 'price') {
+                parcela = valorEmprestimo * (taxaJuros * Math.pow(1 + taxaJuros, prazo)) / (Math.pow(1 + taxaJuros, prazo) - 1);
+                saldoDevedor = valorEmprestimo;
+
+                for (let i = 1; i <= prazo; i++) {
+                    juros = saldoDevedor * taxaJuros;
+                    amortizacao = parcela - juros;
+                    saldoDevedor -= amortizacao;
+
+                    adicionarLinhaTabela(i, amortizacao.toFixed(2), juros.toFixed(2), parcela.toFixed(2), saldoDevedor.toFixed(2));
+                }
+            }
+
+            resultados.style.display = 'block';
+            gerarGrafico(sistema, prazo, tabelaAmortizacao);
+        });
+
+        function adicionarLinhaTabela(periodo, amortizacao, juros, parcela, saldoDevedor) {
+            const linha = tabelaAmortizacao.insertRow();
+            linha.insertCell().textContent = periodo;
+            linha.insertCell().textContent = amortizacao;
+            linha.insertCell().textContent = juros;
+            linha.insertCell().textContent = parcela;
+            linha.insertCell().textContent = saldoDevedor;
+        }
+
+        function gerarGrafico(sistema, prazo, tabela) {
+            const labels = [];
+            const dadosAmortizacao = [];
+            const dadosJuros = [];
+
+            for (let i = 1; i <= prazo; i++) {
+                labels.push(`Mês ${i}`);
+                dadosAmortizacao.push(parseFloat(tabela.rows[i-1].cells[1].textContent));
+                dadosJuros.push(parseFloat(tabela.rows[i-1].cells[2].textContent));
+            }
+
+            if (grafico) {
+                grafico.destroy(); // Destrói o gráfico anterior, se existir
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Amortização',
+                        data: dadosAmortizacao,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Juros',
+                        data: dadosJuros,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

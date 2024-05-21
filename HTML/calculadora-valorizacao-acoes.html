@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Valorização de Ações</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Valorização de Ações</h1>
+        <p>Estime o valor intrínseco de uma ação e tome decisões de investimento mais informadas.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>Como funciona a calculadora?</h2>
+            <p>
+                Esta calculadora utiliza o modelo de Gordon para estimar o valor intrínseco de uma ação. O modelo de Gordon assume que o valor de uma ação é igual à soma de todos os seus dividendos futuros descontados a uma taxa de retorno exigida pelos investidores.
+            </p>
+            <p>
+                A fórmula do modelo de Gordon é:
+            </p>
+            <p class="formula">
+                **Valor da Ação = Dividendo por Ação / (Taxa de Retorno - Taxa de Crescimento dos Dividendos)**
+            </p>
+            <p>
+                Onde:
+            </p>
+            <ul>
+                <li>**Dividendo por Ação:** O valor do dividendo que a empresa espera pagar por ação no próximo ano.</li>
+                <li>**Taxa de Retorno:** A taxa de retorno mínima que os investidores exigem para investir na ação.</li>
+                <li>**Taxa de Crescimento dos Dividendos:** A taxa média anual de crescimento dos dividendos da empresa.</li>
+            </ul>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="form-valorizacao">
+                <label for="dividendo">Dividendo por Ação:</label>
+                <input type="number" id="dividendo" name="dividendo" required>
+
+                <label for="retorno">Taxa de Retorno (%):</label>
+                <input type="number" id="retorno" name="retorno" required>
+
+                <label for="crescimento">Taxa de Crescimento dos Dividendos (%):</label>
+                <input type="number" id="crescimento" name="crescimento" required>
+
+                <button type="submit" class="button">Calcular</button>
+            </form>
+
+            <div id="resultado" style="display:none;">
+                <h3>Valor Intríseco da Ação:</h3>
+                <p id="valor-acao"></p>
+            </div>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Gráfico</h2>
+            <canvas id="chart"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const form = document.getElementById('form-valorizacao');
+        const resultadoDiv = document.getElementById('resultado');
+        const valorAcao = document.getElementById('valor-acao');
+        const graficoSection = document.getElementById('grafico');
+        const chartCanvas = document.getElementById('chart');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const dividendo = parseFloat(document.getElementById('dividendo').value);
+            const retorno = parseFloat(document.getElementById('retorno').value) / 100;
+            const crescimento = parseFloat(document.getElementById('crescimento').value) / 100;
+
+            const valor = dividendo / (retorno - crescimento);
+
+            valorAcao.textContent = `R$ ${valor.toFixed(2)}`;
+            resultadoDiv.style.display = 'block';
+
+            // Dados para o gráfico
+            const labels = [];
+            const data = [];
+            for (let i = 1; i <= 10; i++) {
+                labels.push(`Ano ${i}`);
+                data.push(dividendo * Math.pow(1 + crescimento, i) / (retorno - crescimento));
+            }
+
+            // Criação do gráfico
+            if (window.chartInstance) {
+                window.chartInstance.destroy();
+            }
+
+            window.chartInstance = new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor da Ação',
+                        data: data,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                }
+            });
+
+            graficoSection.style.display = 'block';
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Descontos Compostos Comerciais</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Descontos Compostos Comerciais</h1>
+        <p>Calcule descontos compostos comerciais de forma rápida e fácil.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Descontos Compostos Comerciais?</h2>
+            <p>
+                O desconto composto comercial, também conhecido como desconto "por fora", é um tipo de desconto calculado sobre o valor nominal (valor futuro) de um título, considerando que os juros são compostos (juros sobre juros). 
+            </p>
+            <p>
+                Imagine que você tem um título que vale R$ 1.000,00 daqui a um ano. Se aplicarmos um desconto composto comercial de 10% ao ano, o valor presente do título será menor que R$ 900,00, pois o desconto é aplicado sobre o valor futuro.
+            </p>
+            <p class="formula">
+                Valor Presente (VP) = Valor Nominal (VN) * (1 - Taxa de Desconto)^Tempo
+            </p>
+            <p>Onde:</p>
+            <ul>
+                <li>VP = Valor Presente</li>
+                <li>VN = Valor Nominal (Valor Futuro)</li>
+                <li>Taxa de Desconto = Taxa de desconto por período (em decimal)</li>
+                <li>Tempo = Número de períodos</li>
+            </ul>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-desconto">
+                <label for="valor-nominal">Valor Nominal (VN):</label><br>
+                <input type="number" id="valor-nominal" name="valor-nominal" required><br>
+                <label for="taxa-desconto">Taxa de Desconto (%):</label><br>
+                <input type="number" id="taxa-desconto" name="taxa-desconto" step="0.01" required><br>
+                <label for="tempo">Tempo (em anos):</label><br>
+                <input type="number" id="tempo" name="tempo" required><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p>Valor Presente (VP): <span id="valor-presente"></span></p>
+                <p>Desconto (D): <span id="desconto"></span></p>
+            </div>
+
+            <section id="tabela" style="display:none;">
+                <h2>Tabela de Descontos Acumulados</h2>
+                <table id="tabela-descontos">
+                    <thead>
+                        <tr>
+                            <th>Ano</th>
+                            <th>Valor Inicial</th>
+                            <th>Desconto</th>
+                            <th>Valor Final</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Os dados da tabela serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="grafico" style="display:none;">
+                <h2>Gráfico da Evolução do Valor</h2>
+                <canvas id="grafico-valor"></canvas>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-desconto');
+        const resultados = document.getElementById('resultados');
+        const tabelaSecao = document.getElementById('tabela');
+        const tabelaDescontos = document.getElementById('tabela-descontos').getElementsByTagName('tbody')[0];
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-valor');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const valorNominal = parseFloat(document.getElementById('valor-nominal').value);
+            const taxaDesconto = parseFloat(document.getElementById('taxa-desconto').value) / 100; // Converte a taxa para decimal
+            const tempo = parseInt(document.getElementById('tempo').value);
+
+            const valorPresente = valorNominal * Math.pow((1 - taxaDesconto), tempo);
+            const desconto = valorNominal - valorPresente;
+
+            document.getElementById('valor-presente').textContent = valorPresente.toFixed(2);
+            document.getElementById('desconto').textContent = desconto.toFixed(2);
+
+            resultados.style.display = 'block';
+            tabelaSecao.style.display = 'block';
+            graficoSecao.style.display = 'block';
+
+            gerarTabela(valorNominal, taxaDesconto, tempo);
+            gerarGrafico(valorNominal, taxaDesconto, tempo);
+        });
+
+        function gerarTabela(valorNominal, taxaDesconto, tempo) {
+            tabelaDescontos.innerHTML = ''; // Limpa a tabela anterior
+
+            let valorInicial = valorNominal;
+            for (let t = 1; t <= tempo; t++) {
+                const desconto = valorInicial * taxaDesconto;
+                const valorFinal = valorInicial - desconto;
+
+                const row = tabelaDescontos.insertRow();
+                const anoCell = row.insertCell();
+                const valorInicialCell = row.insertCell();
+                const descontoCell = row.insertCell();
+                const valorFinalCell = row.insertCell();
+
+                anoCell.textContent = t;
+                valorInicialCell.textContent = valorInicial.toFixed(2);
+                descontoCell.textContent = desconto.toFixed(2);
+                valorFinalCell.textContent = valorFinal.toFixed(2);
+
+                valorInicial = valorFinal; 
+            }
+        }
+
+        function gerarGrafico(valorNominal, taxaDesconto, tempo) {
+            const labels = [];
+            const dadosValor = [];
+
+            let valor = valorNominal;
+            for (let t = tempo; t >= 0; t--) {
+                labels.push(`Ano ${tempo - t}`);
+                dadosValor.push(valor);
+                valor = valor * (1 - taxaDesconto);
+            }
+
+            if (grafico) {
+                grafico.destroy(); // Destrói o gráfico anterior, se existir
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor',
+                        data: dadosValor,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Anuidades Diferidas</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Anuidades Diferidas</h1>
+        <p>Calcule o valor futuro ou presente de anuidades com período de diferimento.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Anuidades Diferidas?</h2>
+            <p>
+                Anuidades diferidas são sequências de pagamentos ou recebimentos iguais e periódicos, porém com um período inicial de "espera" chamado de período de diferimento. 
+                Durante esse período, não há fluxo de caixa, os pagamentos (ou recebimentos) só iniciam após o término do período de diferimento.
+            </p>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-anuidade">
+                <label for="valor">Valor do pagamento (PMT):</label><br>
+                <input type="number" id="valor" name="valor" step="0.01" required><br>
+                <label for="taxa">Taxa de juros (i):</label><br>
+                <input type="number" id="taxa" name="taxa" step="0.01" required><br>
+                <label for="tempo">Tempo total (n):</label><br>
+                <input type="number" id="tempo" name="tempo" required><br>
+                <label for="diferimento">Período de diferimento (d):</label><br>
+                <input type="number" id="diferimento" name="diferimento" required><br>
+                <select id="tipo">
+                    <option value="futuro">Valor Futuro</option>
+                    <option value="presente">Valor Presente</option>
+                </select><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p><span id="resultado-tipo"></span>: <span id="resultado"></span></p>
+                <div id="tabela-periodos" style="display:none;">
+                    <h3>Tabela de Períodos:</h3>
+                    <table id="tabela">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Valor no Início</th>
+                                <th>Juros</th>
+                                <th>Valor no Final</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Conteúdo da tabela será inserido aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Gráfico da Evolução do Valor</h2>
+            <canvas id="grafico-anuidade"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-anuidade');
+        const resultados = document.getElementById('resultados');
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-anuidade');
+        const tabelaPeriodos = document.getElementById('tabela-periodos');
+        const tabela = document.getElementById('tabela').getElementsByTagName('tbody')[0];
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const valor = parseFloat(document.getElementById('valor').value);
+            const taxa = parseFloat(document.getElementById('taxa').value) / 100;
+            const tempo = parseInt(document.getElementById('tempo').value);
+            const diferimento = parseInt(document.getElementById('diferimento').value);
+            const tipo = document.getElementById('tipo').value;
+
+            let resultado;
+            if (tipo === 'futuro') {
+                resultado = calcularValorFuturo(valor, taxa, tempo, diferimento);
+                document.getElementById('resultado-tipo').textContent = 'Valor Futuro (FV)';
+            } else {
+                resultado = calcularValorPresente(valor, taxa, tempo, diferimento);
+                document.getElementById('resultado-tipo').textContent = 'Valor Presente (PV)';
+            }
+
+            document.getElementById('resultado').textContent = resultado.toFixed(2);
+            resultados.style.display = 'block';
+            graficoSecao.style.display = 'block';
+
+            gerarGrafico(valor, taxa, tempo, diferimento, tipo);
+            gerarTabela(valor, taxa, tempo, diferimento);
+        });
+
+        function calcularValorFuturo(valor, taxa, tempo, diferimento) {
+            // Fórmula para calcular o valor futuro da anuidade diferida
+            const fator = Math.pow(1 + taxa, tempo - diferimento);
+            return valor * ((fator - 1) / taxa) * (1 + taxa) ** diferimento;
+        }
+
+        function calcularValorPresente(valor, taxa, tempo, diferimento) {
+            // Fórmula para calcular o valor presente da anuidade diferida
+            const fator = Math.pow(1 + taxa, tempo - diferimento);
+            return valor * ((fator - 1) / taxa) * (1 + taxa) ** (-diferimento);
+        }
+
+        function gerarGrafico(valor, taxa, tempo, diferimento, tipo) {
+            const labels = [];
+            const dados = [];
+
+            for (let t = 0; t <= tempo; t++) {
+                labels.push(`Ano ${t}`);
+                if (t < diferimento) {
+                    dados.push(0); 
+                } else {
+                    if (tipo === 'futuro') {
+                        dados.push(calcularValorFuturo(valor, taxa, t, diferimento));
+                    } else {
+                        dados.push(calcularValorPresente(valor, taxa, t, diferimento));
+                    }
+                }
+            }
+
+            if (grafico) {
+                grafico.destroy();
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: tipo === 'futuro' ? 'Valor Futuro' : 'Valor Presente',
+                        data: dados,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function gerarTabela(valor, taxa, tempo, diferimento) {
+            tabela.innerHTML = ''; // Limpa a tabela anterior
+
+            let valorInicial = 0;
+            for (let t = 0; t <= tempo; t++) {
+                const linha = tabela.insertRow();
+                const celulaPeriodo = linha.insertCell();
+                const celulaValorInicial = linha.insertCell();
+                const celulaJuros = linha.insertCell();
+                const celulaValorFinal = linha.insertCell();
+
+                celulaPeriodo.textContent = t;
+                celulaValorInicial.textContent = valorInicial.toFixed(2);
+
+                if (t >= diferimento) {
+                    const juros = valorInicial * taxa;
+                    valorInicial += valor + juros;
+                    celulaJuros.textContent = juros.toFixed(2);
+                } else {
+                    celulaJuros.textContent = '-';
+                }
+
+                celulaValorFinal.textContent = valorInicial.toFixed(2);
+            }
+
+            tabelaPeriodos.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

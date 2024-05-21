@@ -1,0 +1,411 @@
+/* style.css */
+/* style.css */
+
+/* Geral */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    background: #f4f4f4;
+    color: #333;
+  }
+  
+  h1, h2, h3 {
+    color: #333;
+  }
+  
+  a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  
+  .button {
+    display: inline-block;
+    padding: 0.8em 1.5em;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Header */
+  header {
+    background: #333;
+    color: #fff;
+    padding: 1em 0;
+    text-align: center;
+  }
+  
+  header p {
+    margin: 0.5em 0 0;
+    font-size: 1.2em;
+  }
+  
+  /* Navegação */
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: #444;
+    overflow: hidden;
+  }
+  
+  nav li {
+    float: left;
+  }
+  
+  nav a {
+    display: block;
+    color: #fff;
+    text-align: center;
+    padding: 1em 1.5em;
+  }
+  
+  nav a:hover {
+    background-color: #555;
+  }
+  
+  /* Conteúdo Principal */
+  main {
+    padding: 2em;
+  }
+  
+  section {
+    margin-bottom: 3em;
+  }
+  
+  article {
+    background: #fff;
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2em;
+  }
+  
+  article h3 {
+    margin-top: 0;
+  }
+  
+  /* Rodapé */
+  footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em 0;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    nav li {
+      float: none;
+      width: 100%;
+    }
+  }
+
+
+
+  #hero {
+    background-image: url("imagens/hero-background.jpg");
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+    padding: 8em 0; /* Aumenta o espaçamento interno */
+    color: #fff;
+    display: flex; /* Permite centralizar o conteúdo verticalmente */
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+}
+
+.hero-content {
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo mais escuro para melhor legibilidade */
+    padding: 3em 4em; /* Aumenta o espaçamento interno */
+    border-radius: 10px; /* Adiciona cantos arredondados */
+    max-width: 800px; /* Limita a largura máxima do conteúdo */
+}
+
+.hero-content h2 {
+    font-size: 2.5em; /* Aumenta o tamanho do título */
+    margin-bottom: 1em;
+}
+
+.hero-content p {
+    font-size: 1.2em; /* Aumenta o tamanho do parágrafo */
+    line-height: 1.6; /* Melhora o espaçamento entre as linhas */
+    margin-bottom: 2em;
+}
+
+.button {
+    display: inline-block;
+    background-color: #FFD700; /* Cor de destaque para o botão */
+    color: #000;
+    padding: 1em 2em;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease; /* Adiciona uma transição suave */
+}
+
+.button:hover {
+    background-color: #FFC107; /* Cor mais clara ao passar o mouse */
+}
+
+
+.button {
+    display: inline-block;
+    padding: 0.8em 1.5em;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+#ferramentas, #curso, #sobre {
+    padding: 3em 2em;
+    text-align: center;
+}
+
+.ferramentas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-gap: 2em;
+    padding: 2em;
+}
+
+.ferramenta {
+    background-color: #fff;
+    padding: 1em;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.ferramenta:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+.ferramenta img {
+    max-width: 100%;
+    height: auto;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em 0;
+}
+
+/* style.css */
+/* Estilos da página inicial podem ser reaproveitados */
+
+#simulador .investimento {
+    margin-bottom: 2em;
+    border: 1px solid #ccc;
+    padding: 1em;
+    border-radius: 5px;
+}
+
+#simulador label {
+    display: block;
+    margin-top: 0.5em;
+}
+
+#simulador input {
+    width: 100%;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#resultados .graficos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2em;
+}
+
+#resultados .graficos canvas {
+    width: 400px;
+    height: 300px;
+}
+
+#resultados .tabela {
+    margin-top: 2em;
+}
+
+#resultados table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#resultados th, #resultados td {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    text-align: left;
+}
+
+/* style.css (reutilizando o CSS da página inicial com algumas adições) */
+/* ... (código CSS da página inicial) ... */
+
+#simulador {
+    padding: 3em 2em;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#resultados {
+    margin-top: 3em;
+    text-align: left;
+}
+
+#tabela-amortizacao {
+    margin-bottom: 2em;
+}
+
+#tabela-amortizacao table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tabela-amortizacao th,
+#tabela-amortizacao td {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+}
+
+#grafico-amortizacao {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 2em auto;
+}
+
+#resumo-financiamento {
+    margin-bottom: 2em;
+}
+
+/* style.css */
+/* Estilos da página inicial podem ser reaproveitados */
+/* Adicione estilos específicos para o simulador */
+
+#simulador form {
+    background-color: #fff;
+    padding: 2em;
+    border-radius: 5px;
+    margin-bottom: 2em;
+}
+
+#simulador label {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+#simulador input[type="text"] {
+    width: 100%;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#resultados {
+    background-color: #fff;
+    padding: 2em;
+    border-radius: 5px;
+    text-align: center;
+}
+
+#grafico-retornos {
+    max-width: 600px;
+    margin: 2em auto;
+}
+
+#formula {
+    padding: 3em 2em;
+    text-align: center;
+}
+
+/* style.css */
+/* Estilos da página inicial podem ser reaproveitados */
+/* Adicione estilos específicos para o simulador */
+
+#simulador form {
+    background-color: #fff;
+    padding: 2em;
+    border-radius: 5px;
+    margin-bottom: 2em;
+}
+
+#simulador label {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+#simulador input[type="text"], #simulador select {
+    width: 100%;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#resultados {
+    background-color: #fff;
+    padding: 2em;
+    border-radius: 5px;
+    text-align: center;
+}
+
+#grafico-retornos {
+    max-width: 600px;
+    margin: 2em auto;
+}
+
+#formula {
+    padding: 3em 2em;
+    text-align: center;
+}
+
+#formula > div {
+    margin-bottom: 2em;
+}
+
+/* Estilos para a logo */
+header img {
+    width: 150px; /* Ajuste a largura conforme necessário */
+    height: auto;  /* Mantém a proporção da imagem */
+    margin: 10px;  /* Adiciona margens ao redor da logo */
+}

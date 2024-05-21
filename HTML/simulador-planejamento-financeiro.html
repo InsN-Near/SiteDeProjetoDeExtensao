@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Planejamento Financeiro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Simulador de Planejamento Financeiro</h1>
+        <p>Simule seus investimentos e alcance seus objetivos financeiros.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>Planejamento Financeiro para o Futuro</h2>
+            <p>
+                Simule seus investimentos para diferentes objetivos, como aposentadoria, compra de imóveis ou educação dos filhos, considerando inflação, taxas de juros e aportes periódicos. Descubra quanto você precisa investir para alcançar seus sonhos!
+            </p>
+        </section>
+
+        <section id="simulador">
+            <h2>Simulador</h2>
+            <form id="formulario-planejamento">
+                <label for="objetivo">Objetivo Financeiro:</label><br>
+                <input type="text" id="objetivo" name="objetivo" required><br>
+                <label for="valor">Valor Desejado:</label><br>
+                <input type="number" id="valor" name="valor" required><br>
+                <label for="prazo">Prazo (em anos):</label><br>
+                <input type="number" id="prazo" name="prazo" required><br>
+                <label for="aporte">Aporte Mensal:</label><br>
+                <input type="number" id="aporte" name="aporte" required><br>
+                <label for="taxa">Taxa de Juros Anual (%):</label><br>
+                <input type="number" id="taxa" name="taxa" step="0.01" required><br>
+                <label for="inflacao">Inflação Anual (%):</label><br>
+                <input type="number" id="inflacao" name="inflacao" step="0.01" required><br>
+                <input type="submit" value="Simular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados da Simulação:</h3>
+                <p>Objetivo: <span id="resultado-objetivo"></span></p>
+                <p>Valor futuro: <span id="resultado-valor"></span></p>
+                <p>Total Investido: <span id="resultado-total-investido"></span></p>
+                <p>Total Juros: <span id="resultado-total-juros"></span></p>
+                <table id="tabela-evolucao">
+                    <thead>
+                        <tr>
+                            <th>Ano</th>
+                            <th>Aporte Anual</th>
+                            <th>Juros no Ano</th>
+                            <th>Saldo Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas da tabela serão preenchidas pelo script -->
+                    </tbody>
+                </table>
+            </div>
+
+            <section id="grafico" style="display:none;">
+                <h2>Evolução do Saldo Acumulado</h2>
+                <canvas id="grafico-evolucao"></canvas>
+            </section>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-planejamento');
+        const resultadosDiv = document.getElementById('resultados');
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-evolucao');
+        const tabelaEvolucao = document.getElementById('tabela-evolucao').getElementsByTagName('tbody')[0];
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const objetivo = document.getElementById('objetivo').value;
+            const valorDesejado = parseFloat(document.getElementById('valor').value);
+            const prazo = parseInt(document.getElementById('prazo').value);
+            const aporteMensal = parseFloat(document.getElementById('aporte').value);
+            const taxaJurosAnual = parseFloat(document.getElementById('taxa').value) / 100;
+            const inflacaoAnual = parseFloat(document.getElementById('inflacao').value) / 100;
+
+            // Ajusta o valor desejado pela inflação
+            const valorDesejadoAjustado = valorDesejado * Math.pow(1 + inflacaoAnual, prazo);
+
+            const resultados = simularInvestimento(valorDesejadoAjustado, prazo, aporteMensal, taxaJurosAnual);
+
+            document.getElementById('resultado-objetivo').textContent = objetivo;
+            document.getElementById('resultado-valor').textContent = resultados.valorFuturo.toFixed(2);
+            document.getElementById('resultado-total-investido').textContent = resultados.totalInvestido.toFixed(2);
+            document.getElementById('resultado-total-juros').textContent = resultados.totalJuros.toFixed(2);
+
+            // Preenche a tabela de evolução
+            tabelaEvolucao.innerHTML = '';
+            resultados.evolucaoAnual.forEach(function(ano, index) {
+                const linha = tabelaEvolucao.insertRow();
+                linha.insertCell().textContent = index + 1;
+                linha.insertCell().textContent = ano.aporteAnual.toFixed(2);
+                linha.insertCell().textContent = ano.juros.toFixed(2);
+                linha.insertCell().textContent = ano.saldo.toFixed(2);
+            });
+
+            resultadosDiv.style.display = 'block';
+            graficoSecao.style.display = 'block';
+
+            gerarGrafico(resultados.evolucaoAnual);
+        });
+
+        function simularInvestimento(valorDesejado, prazo, aporteMensal, taxaJurosAnual) {
+            const taxaJurosMensal = taxaJurosAnual / 12;
+            let saldo = 0;
+            let totalInvestido = 0;
+            let totalJuros = 0;
+            const evolucaoAnual = [];
+
+            for (let i = 0; i < prazo; i++) {
+                const aporteAnual = aporteMensal * 12;
+                totalInvestido += aporteAnual;
+
+                const juros = saldo * taxaJurosAnual;
+                totalJuros += juros;
+
+                saldo += aporteAnual + juros;
+
+                evolucaoAnual.push({
+                    ano: i + 1,
+                    aporteAnual: aporteAnual,
+                    juros: juros,
+                    saldo: saldo
+                });
+            }
+
+            const valorFuturo = saldo;
+
+            return {
+                valorFuturo: valorFuturo,
+                totalInvestido: totalInvestido,
+                totalJuros: totalJuros,
+                evolucaoAnual: evolucaoAnual
+            };
+        }
+
+        function gerarGrafico(evolucaoAnual) {
+            const labels = evolucaoAnual.map(ano => `Ano ${ano.ano}`);
+            const dadosSaldo = evolucaoAnual.map(ano => ano.saldo);
+
+            if (grafico) {
+                grafico.destroy(); // Destrói o gráfico anterior, se existir
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Saldo Acumulado',
+                        data: dadosSaldo,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

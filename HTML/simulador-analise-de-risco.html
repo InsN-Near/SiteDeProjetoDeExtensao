@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Análise de Risco</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Simulador de Análise de Risco</h1>
+        <p>Avalie o risco de seus investimentos e tome decisões mais conscientes.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>Análise de Risco de Investimentos</h2>
+            <p>
+                A análise de risco é essencial para tomar decisões de investimento mais inteligentes. Ela permite avaliar a probabilidade de perda e a volatilidade dos retornos, ajudando a escolher investimentos mais adequados ao seu perfil de risco.
+            </p>
+        </section>
+
+        <section id="simulador">
+            <h2>Simulador</h2>
+
+            <form id="form-analise-risco">
+                <label for="retornos">Retornos Esperados (separe por vírgula):</label><br>
+                <input type="text" id="retornos" name="retornos" placeholder="Ex: 10, 12, 8, 15"><br><br>
+
+                <label for="probabilidades">Probabilidades (separe por vírgula):</label><br>
+                <input type="text" id="probabilidades" name="probabilidades" placeholder="Ex: 0.4, 0.3, 0.2, 0.1"><br><br>
+
+                <label for="tipo-grafico">Tipo de Gráfico:</label><br>
+                <select id="tipo-grafico" name="tipo-grafico">
+                    <option value="barra">Gráfico de Barras</option>
+                    <option value="dispersao">Gráfico de Dispersão</option>
+                </select><br><br>
+
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados">
+                <h3>Resultados</h3>
+                <p>Retorno Esperado: <span id="retorno-esperado"></span></p>
+                <p>Desvio Padrão: <span id="desvio-padrao"></span></p>
+                <p>Coeficiente de Variação: <span id="coeficiente-variacao"></span></p>
+
+                <canvas id="grafico-retornos"></canvas>
+            </div>
+        </section>
+
+        <section id="formula">
+            <h2>Fórmulas</h2>
+            <div id="formula-desvio-padrao">
+                <h3>Desvio Padrão (σ)</h3>
+                <p>
+                    σ = √[∑(xi - μ)² * Pi]
+                </p>
+                <ul>
+                    <li>σ: Desvio Padrão</li>
+                    <li>xi: Retorno Esperado i</li>
+                    <li>μ: Retorno Esperado Médio</li>
+                    <li>Pi: Probabilidade do Retorno i</li>
+                </ul>
+            </div>
+
+            <div id="formula-coeficiente-variacao">
+                <h3>Coeficiente de Variação (CV)</h3>
+                <p>
+                    CV = σ / μ
+                </p>
+                <ul>
+                    <li>CV: Coeficiente de Variação</li>
+                    <li>σ: Desvio Padrão</li>
+                    <li>μ: Retorno Esperado Médio</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>// script.js
+        const form = document.getElementById('form-analise-risco');
+        const resultadosDiv = document.getElementById('resultados');
+        const retornoEsperadoSpan = document.getElementById('retorno-esperado');
+        const desvioPadraoSpan = document.getElementById('desvio-padrao');
+        const coeficienteVariacaoSpan = document.getElementById('coeficiente-variacao');
+        const graficoRetornosCanvas = document.getElementById('grafico-retornos');
+        let chart = null;
+        
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+        
+            const retornos = document.getElementById('retornos').value.split(',').map(Number);
+            const probabilidades = document.getElementById('probabilidades').value.split(',').map(Number);
+            const tipoGrafico = document.getElementById('tipo-grafico').value;
+        
+            if (retornos.length !== probabilidades.length) {
+                alert('A quantidade de retornos e probabilidades deve ser igual!');
+                return;
+            }
+        
+            const retornoEsperado = calcularRetornoEsperado(retornos, probabilidades);
+            const desvioPadrao = calcularDesvioPadrao(retornos, probabilidades, retornoEsperado);
+            const coeficienteVariacao = desvioPadrao / retornoEsperado;
+        
+            retornoEsperadoSpan.textContent = retornoEsperado.toFixed(2) + '%';
+            desvioPadraoSpan.textContent = desvioPadrao.toFixed(2) + '%';
+            coeficienteVariacaoSpan.textContent = coeficienteVariacao.toFixed(2);
+        
+            resultadosDiv.style.display = 'block';
+        
+            gerarGraficoRetornos(retornos, probabilidades, tipoGrafico);
+        });
+        
+        function calcularRetornoEsperado(retornos, probabilidades) {
+            let retornoEsperado = 0;
+            for (let i = 0; i < retornos.length; i++) {
+                retornoEsperado += retornos[i] * probabilidades[i];
+            }
+            return retornoEsperado;
+        }
+        
+        function calcularDesvioPadrao(retornos, probabilidades, retornoEsperado) {
+            let somatorio = 0;
+            for (let i = 0; i < retornos.length; i++) {
+                somatorio += Math.pow(retornos[i] - retornoEsperado, 2) * probabilidades[i];
+            }
+            return Math.sqrt(somatorio);
+        }
+        
+        function gerarGraficoRetornos(retornos, probabilidades, tipoGrafico) {
+            if (chart) {
+                chart.destroy();
+            }
+        
+            if (tipoGrafico === 'barra') {
+                chart = new Chart(graficoRetornosCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: retornos.map(r => r + '%'),
+                        datasets: [{
+                            label: 'Probabilidade',
+                            data: probabilidades,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Probabilidade'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Retorno Esperado'
+                                }
+                            }
+                        }
+                    }
+                });
+        
+            } else if (tipoGrafico === 'dispersao') {
+                chart = new Chart(graficoRetornosCanvas, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Retorno Esperado vs Probabilidade',
+                            data: retornos.map((retorno, index) => ({
+                                x: retorno,
+                                y: probabilidades[index]
+                            })),
+                            backgroundColor: 'rgba(255, 99, 132, 1)'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Probabilidade'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Retorno Esperado (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }</script>
+</body>
+</html>

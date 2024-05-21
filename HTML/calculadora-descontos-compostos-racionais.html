@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Descontos Compostos Racionais</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Descontos Compostos Racionais</h1>
+        <p>Calcule descontos compostos racionais de forma rápida e fácil.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Descontos Compostos Racionais?</h2>
+            <p>
+                O desconto composto racional, também conhecido como desconto por dentro, é calculado considerando que os juros são compostos sobre o valor presente (valor atual) do título. Em outras palavras, os juros incidem sobre um valor que diminui a cada período, à medida que o desconto é aplicado. A fórmula para calcular o desconto composto racional é:
+            </p>
+            <p class="formula">D = N * (1 - (1 + i)^-n)</p>
+            <p>Onde:</p>
+            <ul>
+                <li>D = Desconto</li>
+                <li>N = Valor nominal (valor futuro)</li>
+                <li>i = Taxa de desconto (em decimal)</li>
+                <li>n = Número de períodos</li>
+            </ul>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-desconto">
+                <label for="valor-nominal">Valor nominal (N):</label><br>
+                <input type="number" id="valor-nominal" name="valor-nominal" required><br>
+                <label for="taxa-desconto">Taxa de desconto (i):</label><br>
+                <input type="number" id="taxa-desconto" name="taxa-desconto" step="0.01" required><br>
+                <label for="periodos">Número de períodos (n):</label><br>
+                <input type="number" id="periodos" name="periodos" required><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p>Desconto (D): <span id="desconto"></span></p>
+                <p>Valor presente (VP): <span id="valor-presente"></span></p>
+            </div>
+        </section>
+
+        <section id="tabela" style="display:none;">
+            <h2>Tabela de Descontos por Período</h2>
+            <table id="tabela-descontos">
+                <thead>
+                    <tr>
+                        <th>Período (n)</th>
+                        <th>Desconto (D)</th>
+                        <th>Valor Presente (VP)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Gráfico da Evolução do Valor Presente</h2>
+            <canvas id="grafico-valor-presente"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-desconto');
+        const resultados = document.getElementById('resultados');
+        const tabelaSecao = document.getElementById('tabela');
+        const tabelaCorpo = document.getElementById('tabela-descontos').getElementsByTagName('tbody')[0];
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-valor-presente');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const valorNominal = parseFloat(document.getElementById('valor-nominal').value);
+            const taxaDesconto = parseFloat(document.getElementById('taxa-desconto').value) / 100;
+            const numPeriodos = parseInt(document.getElementById('periodos').value);
+
+            const desconto = valorNominal * (1 - Math.pow(1 + taxaDesconto, -numPeriodos));
+            const valorPresente = valorNominal - desconto;
+
+            document.getElementById('desconto').textContent = desconto.toFixed(2);
+            document.getElementById('valor-presente').textContent = valorPresente.toFixed(2);
+
+            resultados.style.display = 'block';
+            tabelaSecao.style.display = 'block';
+            graficoSecao.style.display = 'block';
+
+            gerarTabela(valorNominal, taxaDesconto, numPeriodos);
+            gerarGrafico(valorNominal, taxaDesconto, numPeriodos);
+        });
+
+        function gerarTabela(valorNominal, taxaDesconto, numPeriodos) {
+            tabelaCorpo.innerHTML = ''; // Limpa a tabela anterior
+
+            for (let n = 1; n <= numPeriodos; n++) {
+                const descontoPeriodo = valorNominal * (1 - Math.pow(1 + taxaDesconto, -n));
+                const valorPresentePeriodo = valorNominal - descontoPeriodo;
+
+                const linha = tabelaCorpo.insertRow();
+                const celulaPeriodo = linha.insertCell();
+                const celulaDesconto = linha.insertCell();
+                const celulaValorPresente = linha.insertCell();
+
+                celulaPeriodo.textContent = n;
+                celulaDesconto.textContent = descontoPeriodo.toFixed(2);
+                celulaValorPresente.textContent = valorPresentePeriodo.toFixed(2);
+            }
+        }
+
+        function gerarGrafico(valorNominal, taxaDesconto, numPeriodos) {
+            const labels = [];
+            const dadosValorPresente = [];
+
+            for (let n = 1; n <= numPeriodos; n++) {
+                labels.push(`Período ${n}`);
+                dadosValorPresente.push(valorNominal * Math.pow(1 + taxaDesconto, -n));
+            }
+
+            if (grafico) {
+                grafico.destroy(); // Destrói o gráfico anterior, se existir
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Presente',
+                        data: dadosValorPresente,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

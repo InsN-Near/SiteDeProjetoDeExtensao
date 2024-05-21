@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Descontos Simples Racionais</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Descontos Simples Racionais</h1>
+        <p>Calcule descontos simples racionais de forma rápida e fácil.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Descontos Simples Racionais?</h2>
+            <p>
+                O desconto simples racional (ou por dentro) é calculado sobre o valor nominal (valor futuro) do título, representando os juros cobrados antecipadamente. A fórmula para calcular o desconto simples racional é:
+            </p>
+            <p class="formula">D = N * i * t</p>
+            <p>Onde:</p>
+            <ul>
+                <li>D = Desconto</li>
+                <li>N = Valor Nominal (valor futuro)</li>
+                <li>i = Taxa de desconto (em decimal)</li>
+                <li>t = Tempo (no mesmo período da taxa de desconto)</li>
+            </ul>
+            <p>O valor presente (ou atual) é calculado subtraindo o desconto do valor nominal:</p>
+            <p class="formula">A = N - D</p>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-desconto">
+                <label for="valorNominal">Valor Nominal (N):</label><br>
+                <input type="number" id="valorNominal" name="valorNominal" required><br>
+                <label for="taxaDesconto">Taxa de Desconto (i):</label><br>
+                <input type="number" id="taxaDesconto" name="taxaDesconto" step="0.01" required><br>
+                <label for="tempoDesconto">Tempo (t):</label><br>
+                <input type="number" id="tempoDesconto" name="tempoDesconto" required><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p>Desconto (D): <span id="desconto"></span></p>
+                <p>Valor Presente (A): <span id="valorPresente"></span></p>
+            </div>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Comparação entre Valor Nominal e Valor Presente</h2>
+            <canvas id="grafico-desconto"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-desconto');
+        const resultados = document.getElementById('resultados');
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-desconto');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const valorNominal = parseFloat(document.getElementById('valorNominal').value);
+            const taxaDesconto = parseFloat(document.getElementById('taxaDesconto').value) / 100;
+            const tempoDesconto = parseInt(document.getElementById('tempoDesconto').value);
+
+            const desconto = valorNominal * taxaDesconto * tempoDesconto;
+            const valorPresente = valorNominal - desconto;
+
+            document.getElementById('desconto').textContent = desconto.toFixed(2);
+            document.getElementById('valorPresente').textContent = valorPresente.toFixed(2);
+
+            resultados.style.display = 'block';
+            graficoSecao.style.display = 'block';
+
+            gerarGrafico(valorNominal, valorPresente);
+        });
+
+        function gerarGrafico(valorNominal, valorPresente) {
+            if (grafico) {
+                grafico.destroy();
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Valor Nominal', 'Valor Presente'],
+                    datasets: [{
+                        label: 'Comparativo',
+                        data: [valorNominal, valorPresente],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

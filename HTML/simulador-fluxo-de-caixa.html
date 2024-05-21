@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Fluxo de Caixa</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Simulador de Fluxo de Caixa</h1>
+        <p>Planeje suas finanças e visualize seu saldo a cada período.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#ferramentas">Ferramentas</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que é Fluxo de Caixa?</h2>
+            <p>Fluxo de caixa é um instrumento de gestão financeira que demonstra as entradas e saídas de dinheiro em um determinado período. É essencial para controlar as finanças, tomar decisões estratégicas e garantir a saúde financeira de um negócio ou de suas finanças pessoais.</p>
+        </section>
+
+        <section id="simulador">
+            <h2>Simulador</h2>
+
+            <div class="entradas">
+                <h3>Entradas de Caixa</h3>
+                <button onclick="adicionarEntrada()">Adicionar Entrada</button>
+                <div id="entradasContainer"></div>
+            </div>
+
+            <div class="saidas">
+                <h3>Saídas de Caixa</h3>
+                <button onclick="adicionarSaida()">Adicionar Saída</button>
+                <div id="saidasContainer"></div>
+            </div>
+
+            <div class="resultados">
+                <h3>Resultados</h3>
+                <div id="tabelaResultados"></div>
+                <canvas id="graficoFluxoCaixa"></canvas>
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Funções para adicionar entradas e saídas
+        function adicionarEntrada() {
+            let container = document.getElementById('entradasContainer');
+            let input = document.createElement('input');
+            input.type = 'number';
+            input.placeholder = 'Valor da Entrada';
+            container.appendChild(input);
+        }
+
+        function adicionarSaida() {
+            let container = document.getElementById('saidasContainer');
+            let input = document.createElement('input');
+            input.type = 'number';
+            input.placeholder = 'Valor da Saída';
+            container.appendChild(input);
+        }
+
+        // Função para calcular e exibir o fluxo de caixa
+        function calcularFluxoCaixa() {
+            let entradas = document.querySelectorAll('#entradasContainer input');
+            let saidas = document.querySelectorAll('#saidasContainer input');
+            let saldo = 0;
+            let dadosGrafico = [];
+
+            let tabela = '<table><thead><tr><th>Período</th><th>Entradas</th><th>Saídas</th><th>Saldo</th></tr></thead><tbody>';
+
+            for (let i = 0; i < Math.max(entradas.length, saidas.length); i++) {
+                let entrada = entradas[i] ? parseFloat(entradas[i].value) : 0;
+                let saida = saidas[i] ? parseFloat(saidas[i].value) : 0;
+                saldo += entrada - saida;
+                dadosGrafico.push(saldo);
+
+                tabela += `<tr><td>${i + 1}</td><td>${entrada.toFixed(2)}</td><td>${saida.toFixed(2)}</td><td>${saldo.toFixed(2)}</td></tr>`;
+            }
+
+            tabela += '</tbody></table>';
+            document.getElementById('tabelaResultados').innerHTML = tabela;
+
+            // Gerar gráfico
+            gerarGrafico(dadosGrafico);
+        }
+
+        // Função para gerar o gráfico
+        function gerarGrafico(dados) {
+            const ctx = document.getElementById('graficoFluxoCaixa').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dados.map((_, i) => `Período ${i + 1}`),
+                    datasets: [{
+                        label: 'Saldo Acumulado',
+                        data: dados,
+                        borderColor: 'blue',
+                        borderWidth: 2,
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Adicionar evento de clique ao botão "Calcular"
+        document.addEventListener('DOMContentLoaded', function() {
+            let botaoCalcular = document.createElement('button');
+            botaoCalcular.textContent = 'Calcular Fluxo de Caixa';
+            botaoCalcular.onclick = calcularFluxoCaixa;
+            document.getElementById('simulador').appendChild(botaoCalcular);
+        });
+    </script>
+
+</body>
+</html>

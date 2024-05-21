@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Anuidades Ordinárias</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Anuidades Ordinárias</h1>
+        <p>Calcule o valor futuro ou presente de uma anuidade ordinária.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Anuidades Ordinárias?</h2>
+            <p>
+                Uma anuidade ordinária é uma série de pagamentos iguais feitos no final de cada período (ex: mensal, anual). 
+                Esta calculadora permite encontrar o valor futuro (montante acumulado) ou o valor presente (valor inicial necessário) 
+                de uma anuidade ordinária.
+            </p>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-anuidade">
+                <label for="tipo">O que você deseja calcular?</label><br>
+                <select id="tipo" name="tipo">
+                    <option value="vf">Valor Futuro</option>
+                    <option value="vp">Valor Presente</option>
+                </select><br>
+
+                <label for="pagamento">Pagamento (PMT):</label><br>
+                <input type="number" id="pagamento" name="pagamento" required><br>
+
+                <label for="taxa">Taxa de juros (i):</label><br>
+                <input type="number" id="taxa" name="taxa" step="0.01" required><br>
+
+                <label for="periodos">Número de períodos (n):</label><br>
+                <input type="number" id="periodos" name="periodos" required><br>
+
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p id="resultado-calculo"></p>
+                <table id="tabela-periodos" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Pagamento</th>
+                            <th>Juros</th>
+                            <th>Saldo Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas da tabela serão adicionadas aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Gráfico da Evolução do Saldo</h2>
+            <canvas id="grafico-anuidade"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-anuidade');
+        const resultados = document.getElementById('resultados');
+        const resultadoCalculo = document.getElementById('resultado-calculo');
+        const tabelaPeriodos = document.getElementById('tabela-periodos');
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-anuidade');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const tipo = document.getElementById('tipo').value;
+            const pagamento = parseFloat(document.getElementById('pagamento').value);
+            const taxa = parseFloat(document.getElementById('taxa').value) / 100; // Converte a taxa para decimal
+            const periodos = parseInt(document.getElementById('periodos').value);
+
+            let resultado;
+            let formula;
+            if (tipo === 'vf') {
+                resultado = calcularValorFuturo(pagamento, taxa, periodos);
+                formula = `VF = PMT * (((1 + i)^n - 1) / i) = ${pagamento} * (((1 + ${taxa})^${periodos} - 1) / ${taxa})`;
+            } else {
+                resultado = calcularValorPresente(pagamento, taxa, periodos);
+                formula = `VP = PMT * (1 - (1 + i)^-n) / i = ${pagamento} * (1 - (1 + ${taxa})^-${periodos}) / ${taxa}`;
+            }
+
+            resultadoCalculo.textContent = `${tipo === 'vf' ? 'Valor Futuro (VF)' : 'Valor Presente (VP)'}: ${resultado.toFixed(2)}`;
+            
+            // Exibe a fórmula utilizada
+            const formulaElement = document.createElement('p');
+            formulaElement.textContent = formula;
+            resultadoCalculo.appendChild(formulaElement);
+
+            gerarTabela(pagamento, taxa, periodos, tipo);
+            gerarGrafico(pagamento, taxa, periodos);
+
+            resultados.style.display = 'block';
+            tabelaPeriodos.style.display = 'table';
+            graficoSecao.style.display = 'block';
+        });
+
+        function calcularValorFuturo(pagamento, taxa, periodos) {
+            return pagamento * (((1 + taxa) ** periodos - 1) / taxa);
+        }
+
+        function calcularValorPresente(pagamento, taxa, periodos) {
+            return pagamento * ((1 - (1 + taxa) ** -periodos) / taxa);
+        }
+
+        function gerarTabela(pagamento, taxa, periodos, tipo) {
+            const tbody = tabelaPeriodos.querySelector('tbody');
+            tbody.innerHTML = ''; // Limpa a tabela
+
+            let saldo = tipo === 'vf' ? 0 : calcularValorFuturo(pagamento, taxa, periodos); // Valor inicial para VF e VP
+
+            for (let i = 1; i <= periodos; i++) {
+                const juros = tipo === 'vf' ? saldo * taxa : pagamento / ((1 + taxa) ** i) * taxa;
+                saldo = tipo === 'vf' ? saldo + pagamento + juros : saldo - pagamento / ((1 + taxa) ** i); 
+
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
+                    <td>${i}</td>
+                    <td>${pagamento.toFixed(2)}</td>
+                    <td>${juros.toFixed(2)}</td>
+                    <td>${saldo.toFixed(2)}</td>
+                `;
+                tbody.appendChild(linha);
+            }
+        }
+
+        function gerarGrafico(pagamento, taxa, periodos) {
+            const labels = [];
+            const dadosSaldo = [];
+
+            for (let n = 1; n <= periodos; n++) {
+                labels.push(`Período ${n}`);
+                dadosSaldo.push(calcularValorFuturo(pagamento, taxa, n)); // Gráfico sempre mostra a evolução do VF
+            }
+
+            if (grafico) {
+                grafico.destroy(); // Destrói o gráfico anterior, se existir
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Saldo Acumulado',
+                        data: dadosSaldo,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

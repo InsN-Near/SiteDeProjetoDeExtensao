@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Juros Compostos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Calculadora de Juros Compostos</h1>
+        <p>Calcule juros compostos e veja o poder dos juros sobre juros.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#curso">Curso de Matemática Financeira</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>O que são Juros Compostos?</h2>
+            <p>
+                Juros compostos são calculados sobre o capital inicial e também sobre os juros acumulados ao longo do tempo, criando o efeito "juros sobre juros". A fórmula para calcular juros compostos é:
+            </p>
+            <p class="formula">M = C * (1 + i)^t</p>
+            <p>Onde:</p>
+            <ul>
+                <li>M = Montante</li>
+                <li>C = Capital inicial</li>
+                <li>i = Taxa de juros (em decimal)</li>
+                <li>t = Tempo (no mesmo período da taxa de juros)</li>
+            </ul>
+        </section>
+
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="formulario-juros">
+                <label for="capital">Capital inicial (C):</label><br>
+                <input type="number" id="capital" name="capital" required><br>
+                <label for="taxa">Taxa de juros (i):</label><br>
+                <input type="number" id="taxa" name="taxa" step="0.01" required><br>
+                <label for="tempo">Tempo (t):</label><br>
+                <input type="number" id="tempo" name="tempo" required><br>
+                <input type="submit" value="Calcular">
+            </form>
+
+            <div id="resultados" style="display:none;">
+                <h3>Resultados:</h3>
+                <p>Montante (M): <span id="montante"></span></p>
+                <p>Juros (J): <span id="juros"></span></p>
+            </div>
+        </section>
+
+        <section id="grafico" style="display:none;">
+            <h2>Gráfico da Evolução do Montante</h2>
+            <canvas id="grafico-montante"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const formulario = document.getElementById('formulario-juros');
+        const resultados = document.getElementById('resultados');
+        const graficoSecao = document.getElementById('grafico');
+        const graficoCanvas = document.getElementById('grafico-montante');
+        let grafico;
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const capital = parseFloat(document.getElementById('capital').value);
+            const taxa = parseFloat(document.getElementById('taxa').value) / 100; // Converte a taxa para decimal
+            const tempo = parseInt(document.getElementById('tempo').value);
+
+            const montante = capital * Math.pow(1 + taxa, tempo);
+            const juros = montante - capital;
+
+            document.getElementById('montante').textContent = montante.toFixed(2);
+            document.getElementById('juros').textContent = juros.toFixed(2);
+
+            resultados.style.display = 'block';
+            graficoSecao.style.display = 'block';
+
+            gerarGrafico(capital, taxa, tempo);
+        });
+
+        function gerarGrafico(capital, taxa, tempo) {
+            const labels = [];
+            const dadosMontante = [];
+
+            for (let t = 0; t <= tempo; t++) {
+                labels.push(`Ano ${t}`);
+                dadosMontante.push(capital * Math.pow(1 + taxa, t));
+            }
+
+            if (grafico) {
+                grafico.destroy(); // Destrói o gráfico anterior, se existir
+            }
+
+            grafico = new Chart(graficoCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Montante',
+                        data: dadosMontante,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

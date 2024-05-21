@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Financiamentos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Simulador de Financiamentos</h1>
+        <p>Simule diferentes cenários de financiamento e encontre o melhor para você.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#ferramentas">Ferramentas</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="simulador">
+            <h2>Simulador de Financiamentos</h2>
+            <p>Utilize este simulador para comparar diferentes cenários de financiamento, alterando valores como:</p>
+            <ul>
+                <li>Valor do bem</li>
+                <li>Valor da entrada</li>
+                <li>Taxa de juros anual</li>
+                <li>Prazo de financiamento (em anos)</li>
+                <li>Sistema de amortização (SAC ou PRICE)</li>
+            </ul>
+
+            <form id="form-financiamento">
+                <div class="form-group">
+                    <label for="valor-bem">Valor do bem:</label>
+                    <input type="number" id="valor-bem" value="100000" required>
+                </div>
+                <div class="form-group">
+                    <label for="valor-entrada">Valor da entrada:</label>
+                    <input type="number" id="valor-entrada" value="20000" required>
+                </div>
+                <div class="form-group">
+                    <label for="taxa-juros">Taxa de juros anual (%):</label>
+                    <input type="number" id="taxa-juros" value="10" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="prazo-financiamento">Prazo de financiamento (anos):</label>
+                    <input type="number" id="prazo-financiamento" value="20" required>
+                </div>
+                <div class="form-group">
+                    <label for="sistema-amortizacao">Sistema de amortização:</label>
+                    <select id="sistema-amortizacao">
+                        <option value="SAC">SAC</option>
+                        <option value="PRICE">PRICE</option>
+                    </select>
+                </div>
+                <button type="submit" class="button">Simular</button>
+            </form>
+
+            <div id="resultados">
+                <h2>Resultados da Simulação</h2>
+                <div id="tabela-amortizacao"></div>
+                <div id="grafico-amortizacao">
+                    <canvas id="canvas-amortizacao"></canvas>
+                </div>
+                <div id="resumo-financiamento"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>// script-financiamento.js
+        const formFinanciamento = document.getElementById('form-financiamento');
+        const tabelaAmortizacao = document.getElementById('tabela-amortizacao');
+        const canvasAmortizacao = document.getElementById('canvas-amortizacao');
+        const resumoFinanciamento = document.getElementById('resumo-financiamento');
+        
+        formFinanciamento.addEventListener('submit', function(event) {
+          event.preventDefault();
+          simularFinanciamento();
+        });
+        
+        function simularFinanciamento() {
+          // Obter valores do formulário
+          const valorBem = parseFloat(document.getElementById('valor-bem').value);
+          const valorEntrada = parseFloat(document.getElementById('valor-entrada').value);
+          const taxaJurosAnual = parseFloat(document.getElementById('taxa-juros').value) / 100;
+          const prazoFinanciamentoAnos = parseInt(document.getElementById('prazo-financiamento').value);
+          const sistemaAmortizacao = document.getElementById('sistema-amortizacao').value;
+        
+          // Calcular financiamento
+          const prazoFinanciamentoMeses = prazoFinanciamentoAnos * 12;
+          const valorFinanciado = valorBem - valorEntrada;
+          const taxaJurosMensal = taxaJurosAnual / 12;
+        
+          let amortizacao = [];
+          let saldoDevedor = valorFinanciado;
+          let jurosTotal = 0;
+        
+          if (sistemaAmortizacao === 'SAC') {
+            const amortizacaoMensal = valorFinanciado / prazoFinanciamentoMeses;
+            for (let i = 1; i <= prazoFinanciamentoMeses; i++) {
+              const jurosMensal = saldoDevedor * taxaJurosMensal;
+              const prestacao = amortizacaoMensal + jurosMensal;
+              saldoDevedor -= amortizacaoMensal;
+              jurosTotal += jurosMensal;
+              amortizacao.push({
+                mes: i,
+                prestacao: prestacao.toFixed(2),
+                amortizacao: amortizacaoMensal.toFixed(2),
+                juros: jurosMensal.toFixed(2),
+                saldoDevedor: saldoDevedor.toFixed(2)
+              });
+            }
+          } else if (sistemaAmortizacao === 'PRICE') {
+            const prestacao = valorFinanciado * (taxaJurosMensal * Math.pow(1 + taxaJurosMensal, prazoFinanciamentoMeses)) / (Math.pow(1 + taxaJurosMensal, prazoFinanciamentoMeses) - 1);
+            for (let i = 1; i <= prazoFinanciamentoMeses; i++) {
+              const jurosMensal = saldoDevedor * taxaJurosMensal;
+              const amortizacaoMensal = prestacao - jurosMensal;
+              saldoDevedor -= amortizacaoMensal;
+              jurosTotal += jurosMensal;
+              amortizacao.push({
+                mes: i,
+                prestacao: prestacao.toFixed(2),
+                amortizacao: amortizacaoMensal.toFixed(2),
+                juros: jurosMensal.toFixed(2),
+                saldoDevedor: Math.max(saldoDevedor, 0).toFixed(2)
+              });
+            }
+          }
+        
+          // Exibir resultados
+          exibirTabelaAmortizacao(amortizacao);
+          exibirGraficoAmortizacao(amortizacao);
+          exibirResumoFinanciamento(valorFinanciado, jurosTotal);
+        }
+        
+        function exibirTabelaAmortizacao(amortizacao) {
+          let tabelaHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th>Prestação</th>
+                  <th>Amortização</th>
+                  <th>Juros</th>
+                  <th>Saldo Devedor</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          amortizacao.forEach(function(item) {
+            tabelaHTML += `
+              <tr>
+                <td>${item.mes}</td>
+                <td>R$ ${item.prestacao}</td>
+                <td>R$ ${item.amortizacao}</td>
+                <td>R$ ${item.juros}</td>
+                <td>R$ ${item.saldoDevedor}</td>
+              </tr>
+            `;
+          });
+          tabelaHTML += `
+              </tbody>
+            </table>
+          `;
+          tabelaAmortizacao.innerHTML = tabelaHTML;
+        }
+        
+        function exibirGraficoAmortizacao(amortizacao) {
+          const labels = amortizacao.map(item => item.mes);
+          const dataJuros = amortizacao.map(item => parseFloat(item.juros));
+          const dataAmortizacao = amortizacao.map(item => parseFloat(item.amortizacao));
+        
+          // Destruir gráfico existente, se houver
+          if (window.chartAmortizacao) {
+            window.chartAmortizacao.destroy();
+          }
+        
+          // Criar novo gráfico
+          window.chartAmortizacao = new Chart(canvasAmortizacao, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Juros',
+                  data: dataJuros,
+                  borderColor: 'red',
+                  fill: false
+                },
+                {
+                  label: 'Amortização',
+                  data: dataAmortizacao,
+                  borderColor: 'blue',
+                  fill: false
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        }
+        
+        function exibirResumoFinanciamento(valorFinanciado, jurosTotal) {
+          resumoFinanciamento.innerHTML = `
+            <p>Valor financiado: R$ ${valorFinanciado.toFixed(2)}</p>
+            <p>Total de juros: R$ ${jurosTotal.toFixed(2)}</p>
+            <p>Custo total do financiamento: R$ ${(valorFinanciado + jurosTotal).toFixed(2)}</p>
+          `;
+        }</script>
+</body>
+</html>

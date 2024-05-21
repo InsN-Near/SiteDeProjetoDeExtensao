@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Comparação de Investimentos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Simulador de Comparação de Investimentos</h1>
+        <p>Compare diferentes tipos de investimentos e encontre o ideal para você.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Página Inicial</a></li>
+            <li><a href="#ferramentas">Ferramentas</a></li>
+            <li><a href="#sobre">Sobre o Projeto</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="explicacao">
+            <h2>Comparando Investimentos</h2>
+            <p>
+                Escolher o investimento certo pode ser um desafio. Este simulador permite comparar diferentes tipos de investimentos, considerando fatores como rentabilidade, risco e prazo.
+            </p>
+            <p>
+                Informe os dados dos investimentos que deseja comparar e visualize os resultados em gráficos e tabelas.
+            </p>
+        </section>
+
+        <section id="simulador">
+            <h2>Simulador</h2>
+            <form id="form-investimentos">
+                <div class="investimento">
+                    <h3>Investimento 1</h3>
+                    <label for="nome1">Nome:</label>
+                    <input type="text" id="nome1" value="Renda Fixa">
+                    <label for="rentabilidade1">Rentabilidade Anual (%):</label>
+                    <input type="number" id="rentabilidade1" value="10">
+                    <label for="risco1">Risco (0 a 10):</label>
+                    <input type="number" id="risco1" value="2" min="0" max="10">
+                    <label for="prazo1">Prazo (anos):</label>
+                    <input type="number" id="prazo1" value="5" min="1">
+                </div>
+                <div class="investimento">
+                    <h3>Investimento 2</h3>
+                    <label for="nome2">Nome:</label>
+                    <input type="text" id="nome2" value="Ações">
+                    <label for="rentabilidade2">Rentabilidade Anual (%):</label>
+                    <input type="number" id="rentabilidade2" value="15">
+                    <label for="risco2">Risco (0 a 10):</label>
+                    <input type="number" id="risco2" value="6" min="0" max="10">
+                    <label for="prazo2">Prazo (anos):</label>
+                    <input type="number" id="prazo2" value="5" min="1">
+                </div>
+                <!-- Adicione mais investimentos aqui, se necessário -->
+                <button type="submit">Comparar</button>
+            </form>
+        </section>
+
+        <section id="resultados">
+            <h2>Resultados</h2>
+            <div class="graficos">
+                <canvas id="grafico-rentabilidade"></canvas>
+                <canvas id="grafico-risco"></canvas>
+            </div>
+            <div class="tabela">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Investimento</th>
+                            <th>Rentabilidade Total</th>
+                            <th>Risco</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Resultados serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>// script.js
+        document.getElementById('form-investimentos').addEventListener('submit', function(e) {
+            e.preventDefault(); // Impede o envio do formulário
+        
+            // Obtém os dados dos investimentos
+            const investimento1 = {
+                nome: document.getElementById('nome1').value,
+                rentabilidade: parseFloat(document.getElementById('rentabilidade1').value) / 100,
+                risco: parseInt(document.getElementById('risco1').value),
+                prazo: parseInt(document.getElementById('prazo1').value)
+            };
+        
+            const investimento2 = {
+                nome: document.getElementById('nome2').value,
+                rentabilidade: parseFloat(document.getElementById('rentabilidade2').value) / 100,
+                risco: parseInt(document.getElementById('risco2').value),
+                prazo: parseInt(document.getElementById('prazo2').value)
+            };
+        
+            // Calcula a rentabilidade total
+            investimento1.rentabilidadeTotal = calcularRentabilidadeTotal(investimento1.rentabilidade, investimento1.prazo);
+            investimento2.rentabilidadeTotal = calcularRentabilidadeTotal(investimento2.rentabilidade, investimento2.prazo);
+        
+            // Exibe os resultados na tabela
+            exibirResultadosNaTabela(investimento1, investimento2);
+        
+            // Gera os gráficos
+            gerarGraficoRentabilidade(investimento1, investimento2);
+            gerarGraficoRisco(investimento1, investimento2);
+        });
+        
+        function calcularRentabilidadeTotal(rentabilidade, prazo) {
+            // Fórmula de juros compostos: FV = PV * (1 + r)^n
+            return (1 + rentabilidade) ** prazo - 1;
+        }
+        
+        function exibirResultadosNaTabela(investimento1, investimento2) {
+            const tbody = document.querySelector('#resultados tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td>${investimento1.nome}</td>
+                    <td>${(investimento1.rentabilidadeTotal * 100).toFixed(2)}%</td>
+                    <td>${investimento1.risco}</td>
+                </tr>
+                <tr>
+                    <td>${investimento2.nome}</td>
+                    <td>${(investimento2.rentabilidadeTotal * 100).toFixed(2)}%</td>
+                    <td>${investimento2.risco}</td>
+                </tr>
+            `;
+        }
+        
+        function gerarGraficoRentabilidade(investimento1, investimento2) {
+            const canvas = document.getElementById('grafico-rentabilidade');
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: [investimento1.nome, investimento2.nome],
+                    datasets: [{
+                        label: 'Rentabilidade Total',
+                        data: [investimento1.rentabilidadeTotal, investimento2.rentabilidadeTotal],
+                        backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value * 100).toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function gerarGraficoRisco(investimento1, investimento2) {
+            const canvas = document.getElementById('grafico-risco');
+            new Chart(canvas, {
+                type: 'radar',
+                data: {
+                    labels: [investimento1.nome, investimento2.nome],
+                    datasets: [{
+                        label: 'Risco',
+                        data: [investimento1.risco, investimento2.risco],
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
+        }</script>
+
+</body>
+</html>
