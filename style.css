@@ -116,7 +116,6 @@ header {
 }
 
 .header-content {
-  background-color: rgba(0, 0, 0, 0.7);
   /* Fundo mais escuro para melhor legibilidade */
   padding: 3em 4em;
   /* Aumenta o espaçamento interno */
@@ -129,7 +128,7 @@ header {
 .header-content h1 {
   /* Aumenta o tamanho do título */
   margin-bottom: 2em;
-  font-size: 2em;
+  font-size: 2.4em;
 }
 
 .header-content p {
@@ -138,6 +137,10 @@ header {
   line-height: 1.6;
   /* Melhora o espaçamento entre as linhas */
   margin-bottom: 2em;
+}
+
+.header-content h1, .header-content p {
+  text-shadow: 0 4px 20px black;
 }
 
 .button {
@@ -150,6 +153,7 @@ header {
   transition: background-color 0.3s ease;
   font-weight: 600;
   font-size: 1.2em;
+  margin-top: 2em;
 }
 
 .button:hover {
@@ -159,7 +163,6 @@ header {
 
 .acessar-curso {
   background-color: var(--accent-2);
-  margin-top: 2em;
 }
 
 main {
