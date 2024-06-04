@@ -29,6 +29,7 @@ body {
 
 h1 {
   color: var(--accent-1);
+  font-size: 2.4em;
 }
 
 h2 {
@@ -128,7 +129,6 @@ header {
 .header-content h1 {
   /* Aumenta o tamanho do título */
   margin-bottom: 2em;
-  font-size: 2.4em;
 }
 
 .header-content p {
