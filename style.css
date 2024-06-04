@@ -177,14 +177,6 @@ article h3 {
   margin-top: 0;
 }
 
-/* Rodapé */
-footer {
-  background: #333;
-  color: #fff;
-  text-align: center;
-  padding: 1em 0;
-}
-
 /* Responsividade */
 @media (max-width: 768px) {
   nav li {
@@ -261,14 +253,11 @@ footer {
   height: var(--size);
 }
 
-
-
-
 footer {
   background-color: #333;
   color: #fff;
   text-align: center;
-  padding: 1em 0;
+  padding: 6em 0;
 }
 
 /* style.css */
