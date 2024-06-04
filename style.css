@@ -140,7 +140,7 @@ header {
   margin-bottom: 2em;
 }
 
-.header-read-more {
+.button {
   display: inline-block;
   padding: 0.8em 1.5em;
   background-color: var(--accent-1);
@@ -152,9 +152,14 @@ header {
   font-size: 1.2em;
 }
 
-.header-read-more:hover {
+.button:hover {
   filter: brightness(90%);
   color: white;
+}
+
+.acessar-curso {
+  background-color: var(--accent-2);
+  margin-top: 2em;
 }
 
 main {
