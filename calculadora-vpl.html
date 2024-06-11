@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de VPL</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="tool-header">
+        <h1>Calculadora de VPL</h1>
+        <p>Calcule o Valor Presente Líquido de seus investimentos.</p>
+    </header>
+    <main>
+        <section id="explicacao">
+            <h2>Valor Presente Líquido (VPL)</h2>
+            <p>
+                O VPL é a diferença entre o valor presente dos fluxos de caixa que entram e o valor presente dos fluxos de caixa que saem ao longo de um período de tempo. É usado para analisar a rentabilidade de um investimento ou projeto.
+            </p>
+        </section>
+        <section id="calculadora">
+            <h2>Calculadora</h2>
+            <form id="form-vpl">
+                <label for="fluxos-caixa">Fluxos de Caixa (separe por vírgula):</label><br>
+                <input type="text" id="fluxos-caixa" name="fluxos-caixa" placeholder="Ex: -1000, 200, 300, 400"><br><br>
+                <label for="taxa-desconto">Taxa de Desconto:</label><br>
+                <input type="text" id="taxa-desconto" name="taxa-desconto" placeholder="Ex: 0.05"><br><br>
+                <input type="submit" value="Calcular">
+            </form>
+            <div id="resultado">
+                <h3>Resultado</h3>
+                <p>VPL: <span id="vpl"></span></p>
+            </div>
+        </section>
+        <section id="formula">
+            <h2>Fórmula</h2>
+            <div id="formula-vpl">
+                <h3>VPL</h3>
+                <p>
+                    VPL = ∑ (FCt / (1 + r) ^ t) - Investimento Inicial
+                </p>
+                <ul>
+                    <li>FCt: Fluxo de Caixa no período t</li>
+                    <li>r: Taxa de Desconto</li>
+                    <li>t: Período de tempo</li>
+                    <li>Investimento Inicial: Valor inicial investido</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2023 Matemática Financeira para Todos. Todos os direitos reservados.</p>
+    </footer>
+    <script>
+        // script.js
+        const form = document.getElementById('form-vpl');
+        const resultadoDiv = document.getElementById('resultado');
+        const vplSpan = document.getElementById('vpl');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const fluxosCaixa = document.getElementById('fluxos-caixa').value.split(',').map(Number);
+            const taxaDesconto = parseFloat(document.getElementById('taxa-desconto').value);
+
+            const vpl = calcularVPL(fluxosCaixa, taxaDesconto);
+
+            vplSpan.textContent = vpl.toFixed(2);
+
+            resultadoDiv.style.display = 'block';
+        });
+
+        function calcularVPL(fluxosCaixa, taxaDesconto) {
+            let vpl = 0;
+            for (let t = 0; t < fluxosCaixa.length; t++) {
+                vpl += fluxosCaixa[t] / Math.pow(1 + taxaDesconto, t);
+            }
+            return vpl - fluxosCaixa[0];
+        }
+    </script>
+</body>
+</html>

@@ -79,7 +79,7 @@
             event.preventDefault();
 
             const capital = parseFloat(document.getElementById('capital').value);
-            const taxa = parseFloat(document.getElementById('taxa').value) / 100; // Converte a taxa para decimal
+            const taxa = parseFloat(document.getElementById('taxa').value); // Converte a taxa para decimal
             const tempo = parseInt(document.getElementById('tempo').value);
 
             const juros = capital * taxa * tempo;

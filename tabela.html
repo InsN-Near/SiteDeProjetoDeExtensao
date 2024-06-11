@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilha de Orçamento Familiar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+</head>
+<body>
+    <header class="tool-header">
+        <h1>Planilha de Orçamento Familiar</h1>
+        <p>Gerencie seu orçamento familiar de forma eficaz.</p>
+    </header>
+    <main>
+        <section id="planilha">
+            <h2>Planilha</h2>
+            <form id="form-orcamento">
+                <label for="receitas">Receitas (separe por vírgula):</label><br>
+                <input type="text" id="receitas" name="receitas" placeholder="Ex: 3000, 500, 200"><br><br>
+                <label for="despesas">Despesas (separe por vírgula):</label><br>
+                <input type="text" id="despesas" name="despesas" placeholder="Ex: 1500, 800, 200"><br><br>
+                <input type="submit" value="Calcular">
+            </form>
+            <div id="resultado">
+                <h3>Resultado</h3>
+                <p>Saldo: <span id="saldo"></span></p>
+                <button id="exportar">Exportar para Excel</button>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2023 Orçamento Familiar para Todos. Todos os direitos reservados.</p>
+    </footer>
+    <script>
+        // script.js
+        const form = document.getElementById('form-orcamento');
+        const resultadoDiv = document.getElementById('resultado');
+        const saldoSpan = document.getElementById('saldo');
+        const exportarBtn = document.getElementById('exportar');
+
+        let receitas = [];
+        let despesas = [];
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            receitas = document.getElementById('receitas').value.split(',').map(Number);
+            despesas = document.getElementById('despesas').value.split(',').map(Number);
+
+            const saldo = receitas.reduce((a, b) => a + b, 0) - despesas.reduce((a, b) => a + b, 0);
+
+            saldoSpan.textContent = saldo.toFixed(2);
+
+            resultadoDiv.style.display = 'block';
+        });
+
+        exportarBtn.addEventListener('click', () => {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Orçamento Familiar');
+
+            worksheet.columns = [
+                { header: 'Receitas', key: 'receita', width: 10 },
+                { header: 'Despesas', key: 'despesa', width: 10 },
+            ];
+
+            receitas.forEach((receita, index) => {
+                worksheet.addRow({ receita, despesa: despesas[index] });
+            });
+
+            workbook.xlsx.writeBuffer().then((buffer) => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+
+                a.href = url;
+                a.download = 'orcamento_familiar.xlsx';
+                a.click();
+            });
+        });
+    </script>
+</body>
+</html>
